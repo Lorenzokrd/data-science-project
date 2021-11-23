@@ -1,11 +1,12 @@
 #load data from cbs
-main_data <- cbs_get_data("83648NED", Perioden = has_substring("JJ"), RegioS = has_substring("GM"))
+main_data <- cbs_get_data("83648NED",Periodes = '2020JJ00', RegioS = 'NL01  ')
+
 main_data <- cbs_add_label_columns(main_data)
 main_data <- as.data.frame(main_data %>% select(RegioS, RegioS_label,SoortMisdrijf, SoortMisdrijf_label, Perioden, GeregistreerdeMisdrijvenPer1000Inw_3))
 
 #Get all of the unique crimeTypes and add names to them for the user
-uniqueMisdrijf <- unique(data$SoortMisdrijf)
-names(uniqueMisdrijf) <- unique(gsub('[[:digit:]]+', '',as.character(data$SoortMisdrijf_label)))
+uniqueMisdrijf <- unique(main_data$SoortMisdrijf)
+names(uniqueMisdrijf) <- unique(gsub('[[:digit:]]+', '',as.character(main_data$SoortMisdrijf_label)))
 
 colnames(main_data)[which(names(main_data) == "RegioS")] <- "statcode"
 
@@ -18,7 +19,10 @@ server <- function(input, output){
   observeEvent(toListen(),
                {
                  #Filter data by year based on user input
-                 data <- main_data[main_data$Perioden == paste(input$selectionYear,"JJ00",sep = "") & data$SoortMisdrijf == input$selectInput,]
+                 data <- cbs_get_data("83648NED", Perioden = paste(input$selectionYear,"JJ00",sep = ""), RegioS = has_substring("GM"), SoortMisdrijf = input$selectInput)
+                 data <- cbs_add_label_columns(data)
+                 data <- as.data.frame(data %>% select(RegioS, RegioS_label,SoortMisdrijf, SoortMisdrijf_label, Perioden, GeregistreerdeMisdrijvenPer1000Inw_3))
+                 
                  gemeentegrenzen2 <- merge(gemeentegrenzen,data, by="statcode")
                  
                  #create bins and labels
