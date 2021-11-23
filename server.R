@@ -1,7 +1,3 @@
-# data = cbs_get_data("84468NED",
-#                     select=c("WijkenEnBuurten","TotaalDiefstal_8","Gemeentenaam_1")) %>%
-#   mutate(WijkenEnBuurten = str_trim(WijkenEnBuurten),
-#          diefstal = TotaalDiefstal_8)
 data <- cbs_get_data("83648NED", Perioden = "2020JJ00", SoortMisdrijf = "T001161")
 data <- cbs_add_label_columns(data)
 data <- as.data.frame(data)
@@ -22,14 +18,16 @@ server <- function(input, output){
   
   output$map <- renderLeaflet({
     leaflet(gemeentegrenzen) %>%
-      addTiles() %>% 
+      addProviderTiles("MapBox",  options = providerTileOptions(
+        accessToken = Sys.getenv('sk.eyJ1IjoibG9yZW56b2tyIiwiYSI6ImNrd2NjbXYzZjBqYmoydm4yaGp0NWdjdTAifQ.MgJHvSiJFzLj3AWLRlBWNg'))) %>%  
       setView( lat=52.21441431507194, lng=5.5427232721445865 , zoom=8) %>% 
+      
       addPolygons(stroke = TRUE,opacity = 1, fillOpacity = 0.5, smoothFactor = 0.5,
                   color="black", fillColor = ~qpal(gemeentegrenzen$GeregistreerdeMisdrijvenPer1000Inw_3),weight = 1,
                   highlightOptions = highlightOptions(
                     weight = 5,
-                    color = "#666",
-                    fillOpacity = 0.7,
+                    color = "#fff",
+                    fillOpacity = 0.8,
                     bringToFront = TRUE),
                   label = labels,
                   labelOptions = labelOptions(
