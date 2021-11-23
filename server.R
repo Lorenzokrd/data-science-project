@@ -1,7 +1,7 @@
 data = cbs_get_data("84468NED",
                     select=c("WijkenEnBuurten","TotaalDiefstal_8","Gemeentenaam_1")) %>%
   mutate(WijkenEnBuurten = str_trim(WijkenEnBuurten),
-         diefstal = TotaalDiefstal_8)
+         diefstal = TotaalDiefstal_8) 
 
 data <- as.data.frame(data)
 
