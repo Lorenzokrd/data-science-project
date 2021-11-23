@@ -24,7 +24,13 @@ ui <- fluidPage(
       sidebarLayout(
         sidebarPanel( width = 3,
           tags$h3("Plot parameters"),
-          sliderInput("selectionYear", "Jaar", min = 2010, max = 2020, value = 2020, animate = TRUE),
+          sliderInput("selectionYear", "Jaar", min = 2010, max = 2020, value = 2020,
+            animate = animationOptions(
+            interval = 2000,
+            loop = FALSE,
+            playButton = NULL,
+            pauseButton = NULL
+          )),
           selectInput("selectInput","Label", choices = uniqueMisdrijf, selected = uniqueMisdrijf[0])
         ),
         mainPanel( width = 9, 
