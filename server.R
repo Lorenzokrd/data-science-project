@@ -18,8 +18,8 @@ colnames(main_data)[which(names(main_data) == "RegioS")] <- "statcode"
 gemeentegrenzen <- geojson_read("https://raw.githubusercontent.com/dijkstrar/NL-gemeentegrenzen2020/main/gemeente_grenzen_2020.json", what = "sp")
 
 server <- function(input, output){
-
-  observeEvent(input$selectionYear,
+  toListen <- reactive({list(input$selectionYear,input$selectInput)})
+  observeEvent(toListen(),
    {
      #Filter data by year based on user input
      data <- cbs_get_data("83648NED",
