@@ -1,21 +1,26 @@
 #load data from cbs
-main_data <- cbs_get_data("83648NED", Perioden = has_substring("JJ"), SoortMisdrijf = "T001161", RegioS = has_substring("GM"))
+main_data <- cbs_get_data("83648NED", Perioden = has_substring("JJ"), RegioS = has_substring("GM"))
 main_data <- cbs_add_label_columns(main_data)
 main_data <- as.data.frame(main_data %>% select(RegioS, RegioS_label,SoortMisdrijf, SoortMisdrijf_label, Perioden, GeregistreerdeMisdrijvenPer1000Inw_3))
+
+#Get all of the unique crimeTypes and add names to them for the user
+uniqueMisdrijf <- unique(data$SoortMisdrijf)
+names(uniqueMisdrijf) <- unique(gsub('[[:digit:]]+', '',as.character(data$SoortMisdrijf_label)))
 
 colnames(main_data)[which(names(main_data) == "RegioS")] <- "statcode"
 
 #load GEOjson to create the map
 gemeentegrenzen <- geojson_read("https://raw.githubusercontent.com/dijkstrar/NL-gemeentegrenzen2020/main/gemeente_grenzen_2020.json", what = "sp")
 
-
-
 server <- function(input, output){
-  observeEvent(input$selectionYear,
+  toListen <- reactive({list(input$selectionYear,input$selectInput)})
+  
+  observeEvent(toListen(),
                {
                  #Filter data by year based on user input
-                 data <- main_data[main_data$Perioden == paste(input$selectionYear,"JJ00",sep = ""),]
+                 data <- main_data[main_data$Perioden == paste(input$selectionYear,"JJ00",sep = "") & data$SoortMisdrijf == input$selectInput,]
                  gemeentegrenzen2 <- merge(gemeentegrenzen,data, by="statcode")
+                 
                  #create bins and labels
                  qpal = colorBin("Reds", gemeentegrenzen2$GeregistreerdeMisdrijvenPer1000Inw_3, bins=4)
                  labels <- sprintf(
