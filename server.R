@@ -11,7 +11,13 @@ gemeentegrenzen <- merge(gemeentegrenzen,data, by="statcode")
 qpal = colorBin("Reds", gemeentegrenzen$GeregistreerdeMisdrijvenPer1000Inw_3, bins=4)
 
 labels <- sprintf(
-  "<strong>%s</strong><br/>Misdrijven per 1000 inwoners: %s ",
+  "<div class='llabel'>
+    <div class='llabel-header'>
+      <i class='glyphicon glyphicon-map-marker llabel-icon'></i> 
+      <b class='llabel-title'>%s</b><i class='glyphicon glyphicon-chevron-right llabel-icon2'></i>
+    </div>
+    <div class='llabel-info'><span class='llabel-data-name'>Misdrijven per 1000 inwoners</span><span class='llabel-data'>%s</span </div>
+  </div>",
   gemeentegrenzen$RegioS_label, gemeentegrenzen$GeregistreerdeMisdrijvenPer1000Inw_3) %>% lapply(htmltools::HTML)
 
 server <- function(input, output){
@@ -22,7 +28,7 @@ server <- function(input, output){
         accessToken = Sys.getenv('sk.eyJ1IjoibG9yZW56b2tyIiwiYSI6ImNrd2NjbXYzZjBqYmoydm4yaGp0NWdjdTAifQ.MgJHvSiJFzLj3AWLRlBWNg'))) %>%  
       setView( lat=52.21441431507194, lng=5.5427232721445865 , zoom=8) %>% 
       
-      addPolygons(stroke = TRUE,opacity = 1, fillOpacity = 0.5, smoothFactor = 0.5,
+      addPolygons(stroke = TRUE,opacity = 1, fillOpacity = 0.5, smoothFactor = 0.5, layerId = gemeentegrenzen$statcode,
                   color="black", fillColor = ~qpal(gemeentegrenzen$GeregistreerdeMisdrijvenPer1000Inw_3),weight = 1,
                   highlightOptions = highlightOptions(
                     weight = 5,
@@ -31,10 +37,14 @@ server <- function(input, output){
                     bringToFront = TRUE),
                   label = labels,
                   labelOptions = labelOptions(
-                    style = list("font-weight" = "normal", padding = "3px 8px"),
-                    textsize = "15px",
+                    style = list("font-weight" = "normal", padding = "8px 10px"),
+                    textsize = "16px",
                     direction = "auto")) %>%
-      addLegend(values=~gemeentegrenzen$GeregistreerdeMisdrijvenPer1000Inw_3,pal=qpal,title="Misdrijven per 1000 inwoners") 
+      addLegend(values=~gemeentegrenzen$GeregistreerdeMisdrijvenPer1000Inw_3,pal=qpal,position = "bottomright",title="Misdrijven per 1000 inwoners") 
   })
+  
+  observeEvent(input$map_shape_click, {
+    print(input$map_shape_click$id)
+  }) 
   
 }
