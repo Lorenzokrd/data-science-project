@@ -1,3 +1,30 @@
+/* Navar */
+
+span.navbar-brand {
+  font-size: 23px;
+  color: #ddd !important;
+}
+
+/* Sidebar */
+
+.well > hr {
+  border: 1px solid #c8c8c852;
+}
+
+.selectize-input.full {
+  background-color: #ddd !important;
+}
+
+.selectize-dropdown, .selectize-dropdown.form-control {
+  background-color: #ddd !important;
+}
+
+.selectize-input, .selectize-control.single .selectize-input.input-active {
+  background: #ddd !important;
+}
+
+/* Leaflet tooltip */
+
 .leaflet-tooltip > div {
 	display: block;
 	min-width: 270px;
@@ -45,4 +72,17 @@
 .llabel-data {
   float: right;
   font-weight: 600;
+}
+
+/* Year input bar */
+.irs--shiny .irs-bar {
+    top: 25px;
+    height: 8px;
+    border-top: 1px solid #dd666b !important;
+    border-bottom: 1px solid #dd666b !important;
+    background: #d78387 !important;
+}
+
+.irs--shiny .irs-single {
+  background-color: #df6a6f !important;
 }
