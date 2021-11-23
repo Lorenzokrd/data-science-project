@@ -1,0 +1,48 @@
+.leaflet-tooltip > div {
+	display: block;
+	min-width: 270px;
+}
+
+.llabel {
+  display: inline-block;
+}
+
+.llabel-header {
+  border-bottom: 1px solid #d9d8d4;
+  padding-bottom: 3px;
+  padding-right: 9px;
+  padding-left: 7px;
+}
+
+.llabel-icon2 {
+  float: right;
+  position: relative;
+  top: 6px;
+}
+
+.llabel-icon {
+  color: #e65350;
+  font-size: 16px;
+  position: relative;
+  bottom: 1px;
+}
+
+.llabel-title { 
+  font-size: 19px !important;
+}
+
+.llabel-info {
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 10px;
+  
+}
+
+.llabel-data-name {
+  float:left;
+}
+
+.llabel-data {
+  float: right;
+  font-weight: 600;
+}

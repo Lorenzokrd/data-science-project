@@ -17,6 +17,9 @@ library(stringr)
 source('server.R')
 
 ui <- fluidPage(
+  tags$head(
+    tags$link(rel = "stylesheet", type = "text/css", href = "style.css")
+  ),
   theme = shinytheme("slate"),
   useShinyjs(),
   navbarPage("Crime dashboard",
