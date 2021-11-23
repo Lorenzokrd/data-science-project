@@ -25,7 +25,9 @@ ui <- fluidPage(
     tabPanel("Map",
       sidebarLayout(
         sidebarPanel( width = 3,
-          tags$h3("Plot parameters")
+          tags$h3("Plot parameters"),
+          sliderInput("selectionYear", "Jaar", min = 2010, max = 2020, value = 2020, animate = TRUE),
+
         ),
         mainPanel( width = 9, 
           tags$style(type = "text/css", "#map {height: calc(100vh - 80px) !important;}"),
