@@ -14,7 +14,6 @@ library(shinyjs)
 library(treemapify)
 library(shinythemes)
 library(stringr)
-source('server.R')
 
 ui <- fluidPage(
   theme = shinytheme("slate"),
@@ -23,12 +22,13 @@ ui <- fluidPage(
     tabPanel("Map",
       sidebarLayout(
         sidebarPanel( width = 3,
-          selectInput("selectInput","Label", choices = uniqueMisdrijf, selected = uniqueMisdrijf[0]),
-          tags$h3("Plot parameters")
+          tags$h3("Plot parameters"),
+          sliderInput("selectionYear", "Jaar", min = 2010, max = 2020, value = 2020, animate = TRUE),
+
         ),
         mainPanel( width = 9, 
           tags$style(type = "text/css", "#map {height: calc(100vh - 80px) !important;}"),
-          leafletOutput("map")
+          leafletOutput("map"),
         )
       )
     )
