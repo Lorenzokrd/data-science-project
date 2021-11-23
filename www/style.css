@@ -11,6 +11,10 @@ span.navbar-brand {
   border: 1px solid #c8c8c852;
 }
 
+.well > a {
+  color: #ddd;
+}
+
 .selectize-input.full {
   background-color: #ddd !important;
 }
