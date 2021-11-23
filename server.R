@@ -1,21 +1,22 @@
-data = cbs_get_data("84468NED",
-                    select=c("WijkenEnBuurten","TotaalDiefstal_8","Gemeentenaam_1")) %>%
-  mutate(WijkenEnBuurten = str_trim(WijkenEnBuurten),
-         diefstal = TotaalDiefstal_8) 
-
+# data = cbs_get_data("84468NED",
+#                     select=c("WijkenEnBuurten","TotaalDiefstal_8","Gemeentenaam_1")) %>%
+#   mutate(WijkenEnBuurten = str_trim(WijkenEnBuurten),
+#          diefstal = TotaalDiefstal_8)
+data <- cbs_get_data("83648NED", Perioden = "2020JJ00", SoortMisdrijf = "T001161")
+data <- cbs_add_label_columns(data)
 data <- as.data.frame(data)
 
-colnames(data)[which(names(data) == "WijkenEnBuurten")] <- "statcode"
+colnames(data)[which(names(data) == "RegioS")] <- "statcode"
 
 gemeentegrenzen <- geojson_read("https://raw.githubusercontent.com/dijkstrar/NL-gemeentegrenzen2020/main/gemeente_grenzen_2020.json", what = "sp")
 
 gemeentegrenzen <- merge(gemeentegrenzen,data, by="statcode")
 
-qpal = colorBin("Reds", gemeentegrenzen$diefstal, bins=4)
+qpal = colorBin("Reds", gemeentegrenzen$GeregistreerdeMisdrijvenPer1000Inw_3, bins=4)
 
 labels <- sprintf(
-  "<strong>%s</strong><br/>Aantal diefstallen: %s ",
-  gemeentegrenzen$Gemeentenaam_1, gemeentegrenzen$diefstal) %>% lapply(htmltools::HTML)
+  "<strong>%s</strong><br/>Misdrijven per 1000 inwoners: %s ",
+  gemeentegrenzen$RegioS_label, gemeentegrenzen$GeregistreerdeMisdrijvenPer1000Inw_3) %>% lapply(htmltools::HTML)
 
 server <- function(input, output){
   
@@ -24,7 +25,7 @@ server <- function(input, output){
       addTiles() %>% 
       setView( lat=52.21441431507194, lng=5.5427232721445865 , zoom=8) %>% 
       addPolygons(stroke = TRUE,opacity = 1, fillOpacity = 0.5, smoothFactor = 0.5,
-                  color="black", fillColor = ~qpal(gemeentegrenzen$diefstal),weight = 1,
+                  color="black", fillColor = ~qpal(gemeentegrenzen$GeregistreerdeMisdrijvenPer1000Inw_3),weight = 1,
                   highlightOptions = highlightOptions(
                     weight = 5,
                     color = "#666",
@@ -35,7 +36,7 @@ server <- function(input, output){
                     style = list("font-weight" = "normal", padding = "3px 8px"),
                     textsize = "15px",
                     direction = "auto")) %>%
-      addLegend(values=~gemeentegrenzen$diefstal,pal=qpal,title="Aantal diefstallen") 
+      addLegend(values=~gemeentegrenzen$GeregistreerdeMisdrijvenPer1000Inw_3,pal=qpal,title="Misdrijven per 1000 inwoners") 
   })
   
 }
