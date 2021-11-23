@@ -1,16 +1,13 @@
-# data = cbs_get_data("84468NED",
-#                     select=c("WijkenEnBuurten","TotaalDiefstal_8","Gemeentenaam_1")) %>%
-#   mutate(WijkenEnBuurten = str_trim(WijkenEnBuurten),
-#          diefstal = TotaalDiefstal_8)
-data <- cbs_get_data("83648NED", Perioden = "2020JJ00", SoortMisdrijf = "T001161")
+data <- cbs_get_data("83648NED", Perioden = "2020JJ00")
 data <- cbs_add_label_columns(data)
 data <- as.data.frame(data)
+
+uniqueMisdrijf <- unique(data$SoortMisdrijf)
+names(uniqueMisdrijf) <- unique(gsub('[[:digit:]]+', '',as.character(data$SoortMisdrijf_label)))
 
 colnames(data)[which(names(data) == "RegioS")] <- "statcode"
 
 gemeentegrenzen <- geojson_read("https://raw.githubusercontent.com/dijkstrar/NL-gemeentegrenzen2020/main/gemeente_grenzen_2020.json", what = "sp")
-
-gemeentegrenzen <- merge(gemeentegrenzen,data, by="statcode")
 
 qpal = colorBin("Reds", gemeentegrenzen$GeregistreerdeMisdrijvenPer1000Inw_3, bins=4)
 
@@ -19,7 +16,7 @@ labels <- sprintf(
   gemeentegrenzen$RegioS_label, gemeentegrenzen$GeregistreerdeMisdrijvenPer1000Inw_3) %>% lapply(htmltools::HTML)
 
 server <- function(input, output){
-  
+  gemeentegrenzen <- merge(gemeentegrenzen,data[(data$SoortMisdrijf == input$selectInput)], by="statcode")
   output$map <- renderLeaflet({
     leaflet(gemeentegrenzen) %>%
       addTiles() %>% 
