@@ -22,26 +22,37 @@ ui <- fluidPage(
   ),
   theme = shinytheme("slate"),
   useShinyjs(),
-  navbarPage("Crime dashboard"),
-  sidebarLayout(
-    sidebarPanel( width = 3,
-      sliderInput("selectionYear", "Jaar", min = 2010, max = 2020, value = 2020, sep = "",
-        animate = animationOptions(
-        interval = 2000,
-        loop = FALSE,
-        playButton = NULL,
-        pauseButton = NULL
-      )),
-      selectInput("selectInput","Type misdrijf", choices = uniqueMisdrijf, selected = uniqueMisdrijf[0]),
-      tags$hr(),
-      tags$b("Bron"),
-      tags$p("Alle gebruikte data komt van de elektronische databank van het Centraal Bureau voor de Statistiek (CBS)."),
-      tags$a(href="https://opendata.cbs.nl/statline/#/CBS/nl/navigatieScherm/thema", "StatLine CBS")
-    ),
-    mainPanel( width = 9, 
-      tags$style(type = "text/css", "#map {height: calc(100vh - 80px) !important;}"),
-      leafletOutput("map"),
-    )
-  )
+  navbarPage("Crime dashboard",id = "navBar",
+tabPanel("Map", value="mapPanel",
+         sidebarLayout(
+           sidebarPanel( width = 3,
+                         sliderInput("selectionYear", "Jaar", min = 2010, max = 2020, value = 2020, sep = "",
+                                     animate = animationOptions(
+                                       interval = 2000,
+                                       loop = FALSE,
+                                       playButton = NULL,
+                                       pauseButton = NULL
+                                     )),
+                         selectInput("selectInput","Type misdrijf", choices = uniqueMisdrijf, selected = uniqueMisdrijf[0]),
+                         tags$hr(),
+                         tags$b("Bron"),
+                         tags$p("Alle gebruikte data komt van de elektronische databank van het Centraal Bureau voor de Statistiek (CBS)."),
+                         tags$a(href="https://opendata.cbs.nl/statline/#/CBS/nl/navigatieScherm/thema", "StatLine CBS")
+           ),
+           mainPanel( width = 9, 
+                      tags$style(type = "text/css", "#map {height: calc(100vh - 80px) !important;}"),
+                      leafletOutput("map"),
+           )
+         ),),
+tabPanel("gemeente",value = "gemeentePanel",
+           mainPanel( 
+                      width = "100%",
+                      textInput("searchField","Gemeente zoeken",placeholder = "Naam van de gemeente", width = "100%"),
+                      tags$style(type = "text/css", "#map {height: calc(100vh - 80px) !important;}"),
+                      plotlyOutput("testPlot"),
+           )
+),
+)
+
 
 )

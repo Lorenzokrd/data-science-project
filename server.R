@@ -17,7 +17,7 @@ colnames(main_data)[which(names(main_data) == "RegioS")] <- "statcode"
 #load GEOjson to create the map
 gemeentegrenzen <- geojson_read("https://raw.githubusercontent.com/dijkstrar/NL-gemeentegrenzen2020/main/gemeente_grenzen_2020.json", what = "sp")
 
-server <- function(input, output){
+server <- function(input, output, session){
   toListen <- reactive({list(input$selectionYear,input$selectInput)})
   observeEvent(toListen(),
    {
@@ -69,5 +69,31 @@ server <- function(input, output){
   
   observeEvent(input$map_shape_click, {
     print(input$map_shape_click$id)
+
+    updateTabsetPanel(session, "navBar",
+                      selected = "gemeentePanel")
+    data <- cbs_get_data("83648NED",
+                         Perioden = paste(input$selectionYear,"JJ00",sep = ""),
+                         RegioS = input$map_shape_click$id,
+                         select = c("SoortMisdrijf", "Perioden", "RegioS", "GeregistreerdeMisdrijvenPer1000Inw_3"))
+    data <- cbs_add_label_columns(data)
+    colnames(data)[which(names(data) == "RegioS")] <- "statcode"
+    attributes(data$SoortMisdrijf) <- NULL
+    attributes(data$GeregistreerdeMisdrijvenPer1000Inw_3) <- NULL
+    output$testPlot <-renderPlotly(
+      {
+        fig <- plot_ly(
+          x = data$GeregistreerdeMisdrijvenPer1000Inw_3,
+          y = str_trim(data$SoortMisdrijf_label),
+          name = "Soorten Misdrijf",
+          type = "bar"
+        ) %>% layout(yaxis = list(title = "",
+                                  
+                                  categoryorder = "array",
+                                  categoryarray = -data$GeregistreerdeMisdrijvenPer1000Inw_3))
+        
+      })
+    renderText({output$gemeenteNaam <- input$map_shape_click$id})
+    
   }) 
 }
