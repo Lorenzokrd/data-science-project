@@ -72,6 +72,7 @@ server <- function(input, output, session){
 
     updateTabsetPanel(session, "navBar",
                       selected = "gemeentePanel")
+    
     data <- cbs_get_data("83648NED",
                          Perioden = paste(input$selectionYear,"JJ00",sep = ""),
                          RegioS = input$map_shape_click$id,
@@ -80,20 +81,6 @@ server <- function(input, output, session){
     colnames(data)[which(names(data) == "RegioS")] <- "statcode"
     attributes(data$SoortMisdrijf) <- NULL
     attributes(data$GeregistreerdeMisdrijvenPer1000Inw_3) <- NULL
-    output$testPlot <-renderPlotly(
-      {
-        fig <- plot_ly(
-          x = data$GeregistreerdeMisdrijvenPer1000Inw_3,
-          y = str_trim(data$SoortMisdrijf_label),
-          name = "Soorten Misdrijf",
-          type = "bar"
-        ) %>% layout(yaxis = list(title = "",
-                                  
-                                  categoryorder = "array",
-                                  categoryarray = -data$GeregistreerdeMisdrijvenPer1000Inw_3))
-        
-      })
-    renderText({output$gemeenteNaam <- input$map_shape_click$id})
     
   }) 
 }

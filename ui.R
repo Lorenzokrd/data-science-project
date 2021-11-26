@@ -49,7 +49,7 @@ tabPanel("gemeente",value = "gemeentePanel",
                       width = "100%",
                       textInput("searchField","Gemeente zoeken",placeholder = "Naam van de gemeente", width = "100%"),
                       tags$style(type = "text/css", "#map {height: calc(100vh - 80px) !important;}"),
-                      plotlyOutput("testPlot"),
+                      textOutput("gemeenteNaam"),
            )
 ),
 )
