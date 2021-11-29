@@ -1,4 +1,5 @@
 library(cbsodataR)
+library(forecast)
 #loading meta data of dataset
 main_meta <- cbs_get_meta("83648NED")
 
@@ -78,9 +79,6 @@ server <- function(input, output, session){
      })
   
   observeEvent(input$map_shape_click, {
-    print(input$map_shape_click$id)
-    
-
     updateTabsetPanel(session, "navBar",
                       selected = "gemeentePanel")
     
@@ -105,7 +103,6 @@ server <- function(input, output, session){
       city_crime_data <- cbs_add_label_columns(city_crime_data)
       
       pred_result <- get_theft_prediction(input$searchField)
-      print(pred_result)
     }
   })
 }
