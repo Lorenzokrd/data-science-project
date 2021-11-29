@@ -3,7 +3,7 @@ library(forecast)
 
 #loading meta data of dataset
 main_meta <- cbs_get_meta("83648NED")
-prio1data <- read.csv("C:/Users/joost/OneDrive/Documents/GitHub/data-science-project/Data/Prio1dataset.csv")
+
 
 #Get all of the unique crimeTypes and add names to them for the user
 uniqueMisdrijf <- unique(main_meta$SoortMisdrijf$Key)
@@ -31,15 +31,21 @@ get_theft_prediction <- function(cityName)
 }
 
 createPrioPieChart <- function(regio,periode) {
+  prio1data <- cbs_get_data("47008NED",
+                            catalog = "Politie",
+                            Perioden = periode,
+                            RegioS = regio)
+  prio1data <- cbs_add_label_columns(prio1data)
+  
   pieData <- data.frame(
     category=c("0-15 minuten","15-30 minuten","30-45 minuten","45-60 minuten","60-120 minuten","Meer dan 120 minuten"),
     count=c(
-      prio1data$Reactietijd0Tot15Minuten_3[data$RegioS == regio & data$Perioden == periode],
-      prio1data$Reactietijd15Tot30Minuten_4[data$RegioS == regio & data$Perioden == periode],
-      prio1data$Reactietijd30Tot45Minuten_5[data$RegioS == regio & data$Perioden == periode],
-      prio1data$Reactietijd45Tot60Minuten_6[data$RegioS == regio & data$Perioden == periode],
-      prio1data$Reactietijd60Tot120Minuten_7[data$RegioS == regio & data$Perioden == periode],
-      prio1data$ReactietijdMeerDan120Minuten_8[data$RegioS == regio & data$Perioden == periode]
+      prio1data$Reactietijd0Tot15Minuten_3,
+      prio1data$Reactietijd15Tot30Minuten_4,
+      prio1data$Reactietijd30Tot45Minuten_5,
+      prio1data$Reactietijd45Tot60Minuten_6,
+      prio1data$Reactietijd60Tot120Minuten_7,
+      prio1data$ReactietijdMeerDan120Minuten_8
     )
   )
   
@@ -49,14 +55,8 @@ createPrioPieChart <- function(regio,periode) {
   
   pieData$ymin = c(0, head(pieData$ymax, n=-1))
   
-  return(ggplot(pieData, aes(ymax=ymax, ymin=ymin, xmax=7, xmin=6, fill=category)) +
-    geom_rect() +
-    coord_polar(theta="y") +
-    xlim(c(2,7)) +
-    scale_fill_brewer(palette = 7) +
-    theme_void() +
-    labs(fill="Reactietijd Prio 1-melding") +
-    annotate(geom = 'text', x=2,y=0, size = 10, label = paste0(sum(pieData$count), " Totaal")))
+  fig <- plot_ly(pieData,labels = ~category, values = ~count)%>% add_pie(hole = 0.6)%>%layout(title=paste("Reactietijd Prio 1-melding", prio1data$RegioS_label[1]))
+  return(fig)
 }
 
 server <- function(input, output, session){
@@ -129,7 +129,7 @@ server <- function(input, output, session){
     colnames(data)[which(names(data) == "RegioS")] <- "statcode"
     attributes(data$SoortMisdrijf) <- NULL
     attributes(data$GeregistreerdeMisdrijvenPer1000Inw_3) <- NULL
-    output$piechart <- renderPlot({ createPrioPieChart(regio,periode) })
+    output$piechart <- renderPlotly({ createPrioPieChart(regio,periode) })
   })
   
   observeEvent(input$searchBtn,{
