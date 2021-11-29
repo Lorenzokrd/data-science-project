@@ -3,11 +3,6 @@ library(forecast)
 
 #loading meta data of dataset
 main_meta <- cbs_get_meta("83648NED")
-<<<<<<< HEAD
-
-=======
-prio1data <- read.csv("sData/Prio1dataset.csv")
->>>>>>> 8a42f3d98428539ab210a00afd1ab26128634d9e
 
 #Get all of the unique crimeTypes and add names to them for the user
 uniqueMisdrijf <- unique(main_meta$SoortMisdrijf$Key)
@@ -59,7 +54,27 @@ createPrioPieChart <- function(regio,periode) {
   
   pieData$ymin = c(0, head(pieData$ymax, n=-1))
   
-  fig <- plot_ly(pieData,labels = ~category, values = ~count)%>% add_pie(hole = 0.6)%>%layout(title=paste("Reactietijd Prio 1-melding", prio1data$RegioS_label[1]))
+  fig <- plot_ly(
+    pieData,
+    labels = ~category,
+    values = ~count,
+    marker = list(
+      colors = c('#F6BB93', '#FBA490', '#FB8985', '#FC666F', '#B83253', '#651B40'),
+      type = 'pie'
+      )
+    ) %>% add_pie(hole = 0.75)%>%
+    layout(
+      title= list(
+        text = paste("<b>Reactietijd Prio 1-melding", prio1data$RegioS_label[1], "</b>"),
+        y = 0.9,
+        x = 0.20
+      ),
+      paper_bgcolor='#dddddd',
+      plot_bgcolor='#dddddd',
+      width = 900,
+      height = 750,
+      autosize = TRUE
+    )
   return(fig)
 }
 
