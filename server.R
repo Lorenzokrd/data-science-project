@@ -1,4 +1,5 @@
 library(cbsodataR)
+library(forecast)
 #loading meta data of dataset
 main_meta <- cbs_get_meta("83648NED")
 
