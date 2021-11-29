@@ -3,7 +3,7 @@ library(forecast)
 
 #loading meta data of dataset
 main_meta <- cbs_get_meta("83648NED")
-prio1data <- read.csv("C:/Users/joost/OneDrive/Documents/GitHub/data-science-project/Data/Prio1dataset.csv")
+prio1data <- read.csv("sData/Prio1dataset.csv")
 
 #Get all of the unique crimeTypes and add names to them for the user
 uniqueMisdrijf <- unique(main_meta$SoortMisdrijf$Key)
