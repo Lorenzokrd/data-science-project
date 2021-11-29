@@ -1,23 +1,33 @@
 library(cbsodataR)
-#load data from cbs
-main_data <- cbs_get_data("83648NED",
-                          Perioden = '2020JJ00',
-                          RegioS = "GM1680",
-                          select = c("SoortMisdrijf", "Perioden", "RegioS", "GeregistreerdeMisdrijvenPer1000Inw_3"))
-
-main_data <- cbs_add_label_columns(main_data)
-main_data <- as.data.frame(main_data)
+#loading meta data of dataset
+main_meta <- cbs_get_meta("83648NED")
 
 #Get all of the unique crimeTypes and add names to them for the user
-uniqueMisdrijf <- unique(main_data$SoortMisdrijf)
-names(uniqueMisdrijf) <- unique(gsub('[[:digit:]]+', '',as.character(main_data$SoortMisdrijf_label)))
-
-colnames(main_data)[which(names(main_data) == "RegioS")] <- "statcode"
+uniqueMisdrijf <- unique(main_meta$SoortMisdrijf$Key)
+names(uniqueMisdrijf) <- unique(gsub('[[:digit:]]+', '',as.character(main_meta$SoortMisdrijf$Title)))
 
 #load GEOjson to create the map
 gemeentegrenzen <- geojson_read("https://raw.githubusercontent.com/dijkstrar/NL-gemeentegrenzen2020/main/gemeente_grenzen_2020.json", what = "sp")
 
-server <- function(input, output){
+get_theft_prediction <- function(cityName)
+{
+  places <- cbs_get_meta("47015NED", catalog = "Politie")$Plaatsen
+  data <- cbs_get_data("47015NED",
+                       catalog = "Politie",
+                       Perioden = has_substring("2019MM") | has_substring("2020MM") | has_substring("2021MM"),
+                       Plaatsen = places[tolower(places$Title) == tolower(cityName), "Key"],
+                       SoortMisdrijf = has_substring("1.1.1"))
+  data <- cbs_add_label_columns(data)
+  endMonth <- lubridate::month(Sys.Date()) - 1
+  endYear <- lubridate::year(Sys.Date())
+  time_s <- ts(data$GeregistreerdeMisdrijven_1,start=c(2019, 1), end=c(endYear, endMonth), frequency=12)
+  fit <- nnetar(time_s, lambda = "auto")
+  fcast <- forecast(fit, PI=TRUE, h=1, model = forecast.ets)
+  
+  return(data.frame(pred = fcast$mean, lowerBound = fcast$lower, upperBound = fcast$upper))
+}
+
+server <- function(input, output, session){
   toListen <- reactive({list(input$selectionYear,input$selectInput)})
   observeEvent(toListen(),
    {
@@ -69,5 +79,33 @@ server <- function(input, output){
   
   observeEvent(input$map_shape_click, {
     print(input$map_shape_click$id)
-  }) 
+    
+
+    updateTabsetPanel(session, "navBar",
+                      selected = "gemeentePanel")
+    
+    data <- cbs_get_data("83648NED",
+                         Perioden = paste(input$selectionYear,"JJ00",sep = ""),
+                         RegioS = input$map_shape_click$id,
+                         select = c("SoortMisdrijf", "Perioden", "RegioS", "GeregistreerdeMisdrijvenPer1000Inw_3"))
+    data <- cbs_add_label_columns(data)
+    colnames(data)[which(names(data) == "RegioS")] <- "statcode"
+    attributes(data$SoortMisdrijf) <- NULL
+    attributes(data$GeregistreerdeMisdrijvenPer1000Inw_3) <- NULL
+    
+  })
+  
+  observeEvent(input$searchBtn,{
+    if(input$searchField != "" && tolower(input$searchField) %in% tolower(main_meta$RegioS$Title) )
+    {
+      city_crime_data <- cbs_get_data("83648NED",
+                                      Perioden = paste(input$selectionYear,"JJ00",sep = ""),
+                                      RegioS = main_meta$RegioS[tolower(main_meta$RegioS$Title) == tolower(input$searchField), "Key"],
+                                      select = c("SoortMisdrijf", "Perioden", "RegioS", "GeregistreerdeMisdrijvenPer1000Inw_3"))
+      city_crime_data <- cbs_add_label_columns(city_crime_data)
+      
+      pred_result <- get_theft_prediction(input$searchField)
+      print(pred_result)
+    }
+  })
 }
