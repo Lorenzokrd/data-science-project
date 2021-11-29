@@ -1,6 +1,9 @@
 library(cbsodataR)
+library(forecast)
+
 #loading meta data of dataset
 main_meta <- cbs_get_meta("83648NED")
+prio1data <- read.csv("C:/Users/joost/OneDrive/Documents/GitHub/data-science-project/Data/Prio1dataset.csv")
 
 #Get all of the unique crimeTypes and add names to them for the user
 uniqueMisdrijf <- unique(main_meta$SoortMisdrijf$Key)
@@ -25,6 +28,35 @@ get_theft_prediction <- function(cityName)
   fcast <- forecast(fit, PI=TRUE, h=1, model = forecast.ets)
   
   return(data.frame(pred = fcast$mean, lowerBound = fcast$lower, upperBound = fcast$upper))
+}
+
+createPrioPieChart <- function(regio,periode) {
+  pieData <- data.frame(
+    category=c("0-15 minuten","15-30 minuten","30-45 minuten","45-60 minuten","60-120 minuten","Meer dan 120 minuten"),
+    count=c(
+      prio1data$Reactietijd0Tot15Minuten_3[data$RegioS == regio & data$Perioden == periode],
+      prio1data$Reactietijd15Tot30Minuten_4[data$RegioS == regio & data$Perioden == periode],
+      prio1data$Reactietijd30Tot45Minuten_5[data$RegioS == regio & data$Perioden == periode],
+      prio1data$Reactietijd45Tot60Minuten_6[data$RegioS == regio & data$Perioden == periode],
+      prio1data$Reactietijd60Tot120Minuten_7[data$RegioS == regio & data$Perioden == periode],
+      prio1data$ReactietijdMeerDan120Minuten_8[data$RegioS == regio & data$Perioden == periode]
+    )
+  )
+  
+  pieData$percentage = pieData$count / sum(pieData$count)
+  
+  pieData$ymax = cumsum(pieData$percentage)
+  
+  pieData$ymin = c(0, head(pieData$ymax, n=-1))
+  
+  return(ggplot(pieData, aes(ymax=ymax, ymin=ymin, xmax=7, xmin=6, fill=category)) +
+    geom_rect() +
+    coord_polar(theta="y") +
+    xlim(c(2,7)) +
+    scale_fill_brewer(palette = 7) +
+    theme_void() +
+    labs(fill="Reactietijd Prio 1-melding") +
+    annotate(geom = 'text', x=2,y=0, size = 10, label = paste0(sum(pieData$count), " Totaal")))
 }
 
 server <- function(input, output, session){
@@ -83,16 +115,21 @@ server <- function(input, output, session){
 
     updateTabsetPanel(session, "navBar",
                       selected = "gemeentePanel")
+    regio <- input$map_shape_click$id
+    periode <-  paste(input$selectionYear,"JJ00",sep = "")
+    
+    print(regio)
+    print(periode)
     
     data <- cbs_get_data("83648NED",
-                         Perioden = paste(input$selectionYear,"JJ00",sep = ""),
-                         RegioS = input$map_shape_click$id,
+                         Perioden = periode,
+                         RegioS = regio,
                          select = c("SoortMisdrijf", "Perioden", "RegioS", "GeregistreerdeMisdrijvenPer1000Inw_3"))
     data <- cbs_add_label_columns(data)
     colnames(data)[which(names(data) == "RegioS")] <- "statcode"
     attributes(data$SoortMisdrijf) <- NULL
     attributes(data$GeregistreerdeMisdrijvenPer1000Inw_3) <- NULL
-    
+    output$piechart <- renderPlot({ createPrioPieChart(regio,periode) })
   })
   
   observeEvent(input$searchBtn,{
