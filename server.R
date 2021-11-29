@@ -133,10 +133,7 @@ server <- function(input, output, session){
                       selected = "gemeentePanel")
     regio <- input$map_shape_click$id
     periode <-  paste(input$selectionYear,"JJ00",sep = "")
-    
-    print(regio)
-    print(periode)
-    
+ 
     data <- cbs_get_data("83648NED",
                          Perioden = periode,
                          RegioS = regio,
