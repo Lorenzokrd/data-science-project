@@ -1,5 +1,6 @@
 library(cbsodataR)
 library(forecast)
+
 #loading meta data of dataset
 main_meta <- cbs_get_meta("83648NED")
 
@@ -26,6 +27,55 @@ get_theft_prediction <- function(cityName)
   fcast <- forecast(fit, PI=TRUE, h=1, model = forecast.ets)
   
   return(data.frame(pred = fcast$mean, lowerBound = fcast$lower, upperBound = fcast$upper))
+}
+
+createPrioPieChart <- function(regio,periode) {
+  prio1data <- cbs_get_data("47008NED",
+                            catalog = "Politie",
+                            Perioden = periode,
+                            RegioS = regio)
+  prio1data <- cbs_add_label_columns(prio1data)
+  
+  pieData <- data.frame(
+    category=c("0-15 minuten","15-30 minuten","30-45 minuten","45-60 minuten","60-120 minuten","Meer dan 120 minuten"),
+    count=c(
+      prio1data$Reactietijd0Tot15Minuten_3,
+      prio1data$Reactietijd15Tot30Minuten_4,
+      prio1data$Reactietijd30Tot45Minuten_5,
+      prio1data$Reactietijd45Tot60Minuten_6,
+      prio1data$Reactietijd60Tot120Minuten_7,
+      prio1data$ReactietijdMeerDan120Minuten_8
+    )
+  )
+  
+  pieData$percentage = pieData$count / sum(pieData$count)
+  
+  pieData$ymax = cumsum(pieData$percentage)
+  
+  pieData$ymin = c(0, head(pieData$ymax, n=-1))
+  
+  fig <- plot_ly(
+    pieData,
+    labels = ~category,
+    values = ~count,
+    marker = list(
+      colors = c('#F6BB93', '#FBA490', '#FB8985', '#FC666F', '#B83253', '#651B40'),
+      type = 'pie'
+      )
+    ) %>% add_pie(hole = 0.75)%>%
+    layout(
+      title= list(
+        text = paste("<b>Reactietijd Prio 1-melding", prio1data$RegioS_label[1], "</b>"),
+        y = 0.9,
+        x = 0.20
+      ),
+      paper_bgcolor='#dddddd',
+      plot_bgcolor='#dddddd',
+      width = 900,
+      height = 750,
+      autosize = TRUE
+    )
+  return(fig)
 }
 
 server <- function(input, output, session){
@@ -81,16 +131,21 @@ server <- function(input, output, session){
   observeEvent(input$map_shape_click, {
     updateTabsetPanel(session, "navBar",
                       selected = "gemeentePanel")
+    regio <- input$map_shape_click$id
+    periode <-  paste(input$selectionYear,"JJ00",sep = "")
+    
+    print(regio)
+    print(periode)
     
     data <- cbs_get_data("83648NED",
-                         Perioden = paste(input$selectionYear,"JJ00",sep = ""),
-                         RegioS = input$map_shape_click$id,
+                         Perioden = periode,
+                         RegioS = regio,
                          select = c("SoortMisdrijf", "Perioden", "RegioS", "GeregistreerdeMisdrijvenPer1000Inw_3"))
     data <- cbs_add_label_columns(data)
     colnames(data)[which(names(data) == "RegioS")] <- "statcode"
     attributes(data$SoortMisdrijf) <- NULL
     attributes(data$GeregistreerdeMisdrijvenPer1000Inw_3) <- NULL
-    
+    output$piechart <- renderPlotly({ createPrioPieChart(regio,periode) })
   })
   
   observeEvent(input$searchBtn,{
