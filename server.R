@@ -1,6 +1,6 @@
 library(cbsodataR)
 library(forecast)
-
+source('Utils.R')
 #loading meta data of dataset
 main_meta <- cbs_get_meta("83648NED")
 
@@ -11,72 +11,10 @@ names(uniqueMisdrijf) <- unique(gsub('[[:digit:]]+', '',as.character(main_meta$S
 #load GEOjson to create the map
 gemeentegrenzen <- geojson_read("https://raw.githubusercontent.com/dijkstrar/NL-gemeentegrenzen2020/main/gemeente_grenzen_2020.json", what = "sp")
 
-get_theft_prediction <- function(cityName)
-{
-  places <- cbs_get_meta("47015NED", catalog = "Politie")$Plaatsen
-  data <- cbs_get_data("47015NED",
-                       catalog = "Politie",
-                       Perioden = has_substring("2019MM") | has_substring("2020MM") | has_substring("2021MM"),
-                       Plaatsen = places[tolower(places$Title) == tolower(cityName), "Key"],
-                       SoortMisdrijf = has_substring("1.1.1"))
-  data <- cbs_add_label_columns(data)
-  endMonth <- lubridate::month(Sys.Date()) - 1
-  endYear <- lubridate::year(Sys.Date())
-  time_s <- ts(data$GeregistreerdeMisdrijven_1,start=c(2019, 1), end=c(endYear, endMonth), frequency=12)
-  fit <- nnetar(time_s, lambda = "auto")
-  fcast <- forecast(fit, PI=TRUE, h=1, model = forecast.ets)
-  
-  return(data.frame(pred = fcast$mean, lowerBound = fcast$lower, upperBound = fcast$upper))
-}
 
-createPrioPieChart <- function(regio,periode) {
-  prio1data <- cbs_get_data("47008NED",
-                            catalog = "Politie",
-                            Perioden = periode,
-                            RegioS = regio)
-  prio1data <- cbs_add_label_columns(prio1data)
-  
-  pieData <- data.frame(
-    category=c("0-15 minuten","15-30 minuten","30-45 minuten","45-60 minuten","60-120 minuten","Meer dan 120 minuten"),
-    count=c(
-      prio1data$Reactietijd0Tot15Minuten_3,
-      prio1data$Reactietijd15Tot30Minuten_4,
-      prio1data$Reactietijd30Tot45Minuten_5,
-      prio1data$Reactietijd45Tot60Minuten_6,
-      prio1data$Reactietijd60Tot120Minuten_7,
-      prio1data$ReactietijdMeerDan120Minuten_8
-    )
-  )
-  
-  pieData$percentage = pieData$count / sum(pieData$count)
-  
-  pieData$ymax = cumsum(pieData$percentage)
-  
-  pieData$ymin = c(0, head(pieData$ymax, n=-1))
-  
-  fig <- plot_ly(
-    pieData,
-    labels = ~category,
-    values = ~count,
-    marker = list(
-      colors = c('#F6BB93', '#FBA490', '#FB8985', '#FC666F', '#B83253', '#651B40'),
-      type = 'pie'
-      )
-    ) %>% add_pie(hole = 0.75)%>%
-    layout(
-      title= list(
-        text = paste("<b>Reactietijd Prio 1-melding", prio1data$RegioS_label[1], "</b>"),
-        y = 0.9,
-        x = 0.20
-      ),
-      paper_bgcolor='#dddddd',
-      plot_bgcolor='#dddddd',
-      width = 900,
-      height = 750,
-      autosize = TRUE
-    )
-  return(fig)
-}
+
+
+
 
 server <- function(input, output, session){
   toListen <- reactive({list(input$selectionYear,input$selectInput)})
@@ -133,30 +71,31 @@ server <- function(input, output, session){
                       selected = "gemeentePanel")
     regio <- input$map_shape_click$id
     periode <-  paste(input$selectionYear,"JJ00",sep = "")
+    regio_name <- main_meta$RegioS[main_meta$RegioS$Key == regio, "Title"]
+    places <- cbs_get_meta("47015NED", catalog = "Politie")$Plaatsen
     
-    print(regio)
-    print(periode)
+    updateTextInput(session, "searchField", value = regio_name)
     
-    data <- cbs_get_data("83648NED",
-                         Perioden = periode,
-                         RegioS = regio,
-                         select = c("SoortMisdrijf", "Perioden", "RegioS", "GeregistreerdeMisdrijvenPer1000Inw_3"))
-    data <- cbs_add_label_columns(data)
-    colnames(data)[which(names(data) == "RegioS")] <- "statcode"
-    attributes(data$SoortMisdrijf) <- NULL
-    attributes(data$GeregistreerdeMisdrijvenPer1000Inw_3) <- NULL
     output$piechart <- renderPlotly({ createPrioPieChart(regio,periode) })
+    output$crimeRanking <- renderPlotly({ create_crime_ranking(periode,regio)})
+
+    if(length(places[tolower(places$Title) == tolower(regio_name), "Key"] > 0))
+    {
+      output$predictionChart <- renderPlotly({create_prediction_chart(regio_name)})
+      theft_data <- get_theft_data(regio_name)
+      output$theftDate <- renderText({paste(theft_data[1], theft_data[2],sep="/")}) 
+      output$theftNumber <- renderText({as.character(theft_data[3])})
+    }
   })
   
   observeEvent(input$searchBtn,{
     if(input$searchField != "" && tolower(input$searchField) %in% tolower(main_meta$RegioS$Title) )
     {
-      city_crime_data <- cbs_get_data("83648NED",
-                                      Perioden = paste(input$selectionYear,"JJ00",sep = ""),
-                                      RegioS = main_meta$RegioS[tolower(main_meta$RegioS$Title) == tolower(input$searchField), "Key"],
-                                      select = c("SoortMisdrijf", "Perioden", "RegioS", "GeregistreerdeMisdrijvenPer1000Inw_3"))
-      city_crime_data <- cbs_add_label_columns(city_crime_data)
+      periode <- paste(input$selectionYear,"JJ00",sep = "")
+      regio <- main_meta$RegioS[tolower(main_meta$RegioS$Title) == tolower(input$searchField), "Key"]
       
+      city_crime_data <- get_crime_data(periode,regio)
+      output$piechart <- renderPlotly({ createPrioPieChart(regio,periode) })
       pred_result <- get_theft_prediction(input$searchField)
     }
   })

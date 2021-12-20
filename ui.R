@@ -45,15 +45,44 @@ tabPanel("Map", value="mapPanel",
            )
          ),),
 tabPanel("gemeente",value = "gemeentePanel",
-           mainPanel( 
-                      width = "100%",
-                      textInput("searchField","Gemeente zoeken",placeholder = "Naam van de gemeente", width = "100%"),
-                      actionButton("searchBtn", "Zoeken"),
-                      tags$style(type = "text/css", "#map {height: calc(100vh - 80px) !important;}"),
-                      plotlyOutput("piechart")
-           )
+           # mainPanel(
+           #            width = "100%",
+           #            textInput("searchField","Gemeente zoeken",placeholder = "Naam van de gemeente", width = "100%"),
+           #            actionButton("searchBtn", "Zoeken"),
+           #            tags$style(type = "text/css", "#map {height: calc(100vh - 80px) !important;}"),
+           #            
+           # ),
+         fluidPage(
+           fluidRow(
+             column(11,
+                   textInput("searchField","Gemeente zoeken",placeholder = "Naam van de gemeente", width = "100%"),
+                   actionButton("searchBtn", "Zoeken"),
+                   tags$style(type = "text/css", "#map {height: calc(100vh - 80px) !important;}"))),
+           fluidRow(
+             column(
+               6,
+               plotlyOutput("piechart"),
+
+             ),
+             column(
+               6,
+               plotlyOutput("crimeRanking"))
+           ),
+           tags$br(),
+           fluidRow(
+             column(
+               6,
+               tags$h2("Diefstal van brom-,snor-,fietsen"),
+               tags$br(),
+               textOutput("theftDate"),
+               tags$br(),
+               textOutput("theftNumber")),
+             column(
+               6,
+               plotlyOutput("predictionChart")),
+             )
+           ),
+         
+         )
 ),
-)
-
-
 )
