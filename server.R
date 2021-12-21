@@ -71,8 +71,6 @@ createPrioPieChart <- function(regio,periode) {
       ),
       paper_bgcolor='#dddddd',
       plot_bgcolor='#dddddd',
-      width = 900,
-      height = 750,
       autosize = TRUE
     )
   return(fig)
@@ -143,18 +141,23 @@ server <- function(input, output, session){
     attributes(data$SoortMisdrijf) <- NULL
     attributes(data$GeregistreerdeMisdrijvenPer1000Inw_3) <- NULL
     output$piechart <- renderPlotly({ createPrioPieChart(regio,periode) })
+    output$werkloosheid <- renderText(cbs_get_data("84961NED", Perioden = periode, RegioS = regio, Persoonskenmerken = "T009002", select = c("Werkloosheidspercentage_13"))[[1]])
   })
   
   observeEvent(input$searchBtn,{
     if(input$searchField != "" && tolower(input$searchField) %in% tolower(main_meta$RegioS$Title) )
     {
+      regio <- main_meta$RegioS[tolower(main_meta$RegioS$Title) == tolower(input$searchField), "Key"]
+      periode <-  paste(input$selectionYear,"JJ00",sep = "")
+      
       city_crime_data <- cbs_get_data("83648NED",
-                                      Perioden = paste(input$selectionYear,"JJ00",sep = ""),
-                                      RegioS = main_meta$RegioS[tolower(main_meta$RegioS$Title) == tolower(input$searchField), "Key"],
+                                      Perioden = periode,
+                                      RegioS = regio,
                                       select = c("SoortMisdrijf", "Perioden", "RegioS", "GeregistreerdeMisdrijvenPer1000Inw_3"))
       city_crime_data <- cbs_add_label_columns(city_crime_data)
-      
       pred_result <- get_theft_prediction(input$searchField)
+      output$piechart <- renderPlotly({ createPrioPieChart(regio,periode) })
+      output$werkloosheid <- renderText(cbs_get_data("84961NED", Perioden = periode, RegioS = regio, Persoonskenmerken = "T009002", select = c("Werkloosheidspercentage_13"))[[1]])
     }
   })
 }

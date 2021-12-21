@@ -14,6 +14,7 @@ library(shinyjs)
 library(treemapify)
 library(shinythemes)
 library(stringr)
+library(shinydashboard)
 source('server.R')
 
 ui <- fluidPage(
@@ -50,7 +51,16 @@ tabPanel("gemeente",value = "gemeentePanel",
                       textInput("searchField","Gemeente zoeken",placeholder = "Naam van de gemeente", width = "100%"),
                       actionButton("searchBtn", "Zoeken"),
                       tags$style(type = "text/css", "#map {height: calc(100vh - 80px) !important;}"),
-                      plotlyOutput("piechart")
+                      fluidRow(
+                        width = "100%",
+                        plotlyOutput("piechart"),
+                        valueBox(
+                          value = "Werkloosheid Percentage",
+                          subtitle = textOutput("werkloosheid"),
+                          icon = icon("briefcase"),
+                          color = "green"
+                        )
+                      )
            )
 ),
 )
