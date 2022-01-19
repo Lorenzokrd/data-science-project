@@ -54,7 +54,7 @@ tabPanel("Gemeente",value = "gemeentePanel",
            # ),
          fluidPage(
            fluidRow(
-             column(11,
+             column(12,
                    textInput("searchField","Gemeente zoeken",placeholder = "Naam van de gemeente", width = "100%"),
                    actionButton("searchBtn", "Zoeken"),
                    tags$style(type = "text/css", "#map {height: calc(100vh - 80px) !important;}"))),
