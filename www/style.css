@@ -95,3 +95,13 @@ span.navbar-brand {
   background-color: #df6a6f !important;
 }
 
+/* Searchbar */
+
+label#searchField-label {
+    display: none;
+}
+
+button#searchBtn {
+    width: 100% !important;
+    height: 41px !important;
+}
