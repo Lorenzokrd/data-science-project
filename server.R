@@ -77,21 +77,29 @@ server <- function(input, output, session){
     if(length(places[tolower(places$Title) == tolower(regio_name), "Key"] > 0))
     {
       output$predictionChart <- renderPlotly({create_prediction_chart(regio_name)})
-      theft_data <- get_theft_data(regio_name)
-      output$theftDate <- renderText({paste(theft_data[1], theft_data[2],sep="/")}) 
-      output$theftNumber <- renderText({as.character(theft_data[3])})
+      output$biketheftchart <- renderPlotly({bike_theft_chart(regio_name)})
+      output$companytheftchart <- renderPlotly({company_robberies_chart(regio_name)})
+      output$storerobberychart <- renderPlotly({store_robberies_chart(regio_name) })
     }
   })
   
   observeEvent(input$searchBtn,{
     if(input$searchField != "" && tolower(input$searchField) %in% tolower(main_meta$RegioS$Title) )
     {
+      places <- cbs_get_meta("47015NED", catalog = "Politie")$Plaatsen
       periode <- paste(input$selectionYear,"JJ00",sep = "")
       regio <- main_meta$RegioS[tolower(main_meta$RegioS$Title) == tolower(input$searchField), "Key"]
       
       city_crime_data <- get_crime_data(periode,regio)
       output$piechart <- renderPlotly({ createPrioPieChart(regio,periode) })
-      pred_result <- get_theft_prediction(input$searchField)
+      output$crimeRanking <- renderPlotly({ create_crime_ranking(periode,regio)})
+      if(length(places[tolower(places$Title) == tolower(input$searchField), "Key"] > 0))
+      {
+        output$predictionChart <- renderPlotly({create_prediction_chart(input$searchField)})
+        output$biketheftchart <- renderPlotly({bike_theft_chart(input$searchField)})
+        output$companytheftchart <- renderPlotly({company_robberies_chart(input$searchField) })
+        output$storerobberychart <- renderPlotly({store_robberies_chart(input$searchField) })
+      }
     }
   })
 }

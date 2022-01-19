@@ -23,7 +23,7 @@ ui <- fluidPage(
   theme = shinytheme("slate"),
   useShinyjs(),
   navbarPage("Crime dashboard",id = "navBar",
-tabPanel("Nederland", value="mapPanel",
+tabPanel("Map", value="mapPanel",
          sidebarLayout(
            sidebarPanel( width = 3,
                          sliderInput("selectionYear", "Jaar", min = 2010, max = 2020, value = 2020, sep = "",
@@ -44,7 +44,7 @@ tabPanel("Nederland", value="mapPanel",
                       leafletOutput("map"),
            )
          ),),
-tabPanel("Gemeente",value = "gemeentePanel",
+tabPanel("gemeente",value = "gemeentePanel",
            # mainPanel(
            #            width = "100%",
            #            textInput("searchField","Gemeente zoeken",placeholder = "Naam van de gemeente", width = "100%"),
@@ -54,33 +54,41 @@ tabPanel("Gemeente",value = "gemeentePanel",
            # ),
          fluidPage(
            fluidRow(
-             column(12,
+             column(11,
                    textInput("searchField","Gemeente zoeken",placeholder = "Naam van de gemeente", width = "100%"),
                    actionButton("searchBtn", "Zoeken"),
                    tags$style(type = "text/css", "#map {height: calc(100vh - 80px) !important;}"))),
-           fluidRow(
-             column(
-               6,
-               plotlyOutput("crimeRanking"),
-
-             ),
-             column(
-               6,
-               plotlyOutput("piechart"))
-           ),
            tags$br(),
            fluidRow(
              column(
                6,
-               plotlyOutput("predictionChart")),
+               plotlyOutput("piechart"),
+
+             ),
              column(
                6,
-               tags$h2("Diefstal van brom-,snor-,fietsen"),
-               tags$br(),
-               textOutput("theftDate"),
-               tags$br(),
-               textOutput("theftNumber"))
-             )
+               plotlyOutput("crimeRanking"))
+           ),
+           tags$br(),
+           fluidRow(
+
+             column(
+               6,
+               plotlyOutput("biketheftchart")),
+             column(
+               6,
+               plotlyOutput("predictionChart")),
+             ),
+           tags$br(),
+           fluidRow(
+             
+             column(
+               6,
+               plotlyOutput("companytheftchart")),
+             column(
+               6,
+               plotlyOutput("storerobberychart")),
+           )
            ),
          
          )
