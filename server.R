@@ -11,11 +11,6 @@ names(uniqueMisdrijf) <- unique(gsub('[[:digit:]]+', '',as.character(main_meta$S
 #load GEOjson to create the map
 gemeentegrenzen <- geojson_read("https://raw.githubusercontent.com/dijkstrar/NL-gemeentegrenzen2020/main/gemeente_grenzen_2020.json", what = "sp")
 
-
-
-
-
-
 server <- function(input, output, session){
   toListen <- reactive({list(input$selectionYear,input$selectInput)})
   observeEvent(toListen(),
@@ -76,7 +71,7 @@ server <- function(input, output, session){
     
     updateTextInput(session, "searchField", value = regio_name)
     
-    output$piechart <- renderPlotly({ createPrioPieChart(regio,periode) })
+    output$piechart <- renderPlotly({ createPrioPieChart(regio,periode) }) 
     output$crimeRanking <- renderPlotly({ create_crime_ranking(periode,regio)})
 
     if(length(places[tolower(places$Title) == tolower(regio_name), "Key"] > 0))

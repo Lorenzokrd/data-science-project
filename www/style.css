@@ -1,4 +1,8 @@
-/* Navar */
+body {
+  margin-bottom: 20px;
+}
+
+/* Navbar */
 
 span.navbar-brand {
   font-size: 23px;
@@ -90,3 +94,4 @@ span.navbar-brand {
 .irs--shiny .irs-single {
   background-color: #df6a6f !important;
 }
+

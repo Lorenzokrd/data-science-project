@@ -51,11 +51,9 @@ createPrioPieChart <- function(regio,periode) {
     add_pie(hole = 0.75)%>%
     layout( 
       title = list(text = paste("<b>Reactietijd Prio 1-melding", prio1data$RegioS_label[1], "</b>")),
-      paper_bgcolor='#dddddd',
-      plot_bgcolor='#dddddd',
       xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
       yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-      margin = list(t = 105))
+      margin = list(t = 80))
   return(fig)
 }
 
@@ -85,7 +83,9 @@ create_crime_ranking <- function(periode, regio)
                                      categoryorder = "array",
                                      categoryarray = desc(crimes$SoortMisdrijf_label)),
                         xaxis = list(title = "Misdrijven per 1000 inw."),
-                        title = "Meest Voorkomende Misdrijven")
+                        title = list(text = paste("<b>Meest voorkomende misdrijven", "</b>")),
+                        margin = list(t = 80))
+  
   return(fig)
 }
 
@@ -110,6 +110,6 @@ create_prediction_chart <- function(cityName)
   fig <- fig %>% add_trace( text = round(prediction[,"Hi 95"]),y = row.names(prediction),x = prediction[,"Hi 95"], name = "Hoogst verwachte aantal",width = 0.3)
   fig <- fig %>%add_trace(text =round(prediction[,"Point Forecast"]) ,y = row.names(prediction),x = prediction[,"Point Forecast"], name = "Gemiddeld verwachte aantal",width = 0.3)
   fig <- fig %>% add_trace(text = round(prediction[,"Lo 95"]),y = row.names(prediction),x = prediction[,"Lo 95"], name = "Laagst verwachte aantal",width = 0.3)
-  fig <- fig %>% layout(title = paste("Voorspelling aantal diefstallen", row.names(prediction),sep = " "),xaxis = list(title = "aantal diefstallen"), yaxis = list(title = "Maand", visible = FALSE), barmode = "overlay")
+  fig <- fig %>% layout(margin = list(t = 80), title = paste("<b>Voorspelling aantal diefstallen ", row.names(prediction), "</b>"),xaxis = list(title = "aantal diefstallen"), yaxis = list(title = "Maand", visible = FALSE), barmode = "overlay")
   return(fig)
 }

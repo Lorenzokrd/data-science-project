@@ -23,7 +23,7 @@ ui <- fluidPage(
   theme = shinytheme("slate"),
   useShinyjs(),
   navbarPage("Crime dashboard",id = "navBar",
-tabPanel("Map", value="mapPanel",
+tabPanel("Nederland", value="mapPanel",
          sidebarLayout(
            sidebarPanel( width = 3,
                          sliderInput("selectionYear", "Jaar", min = 2010, max = 2020, value = 2020, sep = "",
@@ -44,7 +44,7 @@ tabPanel("Map", value="mapPanel",
                       leafletOutput("map"),
            )
          ),),
-tabPanel("gemeente",value = "gemeentePanel",
+tabPanel("Gemeente",value = "gemeentePanel",
            # mainPanel(
            #            width = "100%",
            #            textInput("searchField","Gemeente zoeken",placeholder = "Naam van de gemeente", width = "100%"),
@@ -61,25 +61,25 @@ tabPanel("gemeente",value = "gemeentePanel",
            fluidRow(
              column(
                6,
-               plotlyOutput("piechart"),
+               plotlyOutput("crimeRanking"),
 
              ),
              column(
                6,
-               plotlyOutput("crimeRanking"))
+               plotlyOutput("piechart"))
            ),
            tags$br(),
            fluidRow(
+             column(
+               6,
+               plotlyOutput("predictionChart")),
              column(
                6,
                tags$h2("Diefstal van brom-,snor-,fietsen"),
                tags$br(),
                textOutput("theftDate"),
                tags$br(),
-               textOutput("theftNumber")),
-             column(
-               6,
-               plotlyOutput("predictionChart")),
+               textOutput("theftNumber"))
              )
            ),
          
