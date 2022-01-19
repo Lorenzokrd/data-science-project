@@ -58,6 +58,7 @@ tabPanel("gemeente",value = "gemeentePanel",
                    textInput("searchField","Gemeente zoeken",placeholder = "Naam van de gemeente", width = "100%"),
                    actionButton("searchBtn", "Zoeken"),
                    tags$style(type = "text/css", "#map {height: calc(100vh - 80px) !important;}"))),
+           tags$br(),
            fluidRow(
              column(
                6,
@@ -70,17 +71,24 @@ tabPanel("gemeente",value = "gemeentePanel",
            ),
            tags$br(),
            fluidRow(
+
              column(
                6,
-               tags$h2("Diefstal van brom-,snor-,fietsen"),
-               tags$br(),
-               textOutput("theftDate"),
-               tags$br(),
-               textOutput("theftNumber")),
+               plotlyOutput("biketheftchart")),
              column(
                6,
                plotlyOutput("predictionChart")),
-             )
+             ),
+           tags$br(),
+           fluidRow(
+             
+             column(
+               6,
+               plotlyOutput("companytheftchart")),
+             column(
+               6,
+               plotlyOutput("storerobberychart")),
+           )
            ),
          
          )
