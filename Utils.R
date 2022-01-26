@@ -84,11 +84,10 @@ createPrioPieChart <- function(regio,periode) {
                         name = "Nederland",
                         hole = 0.75)
   fig <- fig %>%layout(title = list(text = paste("<b>Reactietijd Prio 1-melding", prio1data$RegioS_label[1], "</b>")),
-                       paper_bgcolor='#dddddd',
-                       plot_bgcolor='#dddddd',
                        xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
                        yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                       showlegend = FALSE)
+                       showlegend = FALSE,
+                       margin = list(t = 80))
 
   return(fig)
 }
@@ -129,8 +128,9 @@ create_crime_ranking <- function(periode, regio)
                                      categoryorder = "array",
                                      categoryarray = desc(crimes$SoortMisdrijf_label)),
                         xaxis = list(title = "Misdrijven per 1000 inw."),
-                        title = "Meest Voorkomende Misdrijven",
-                        barmode = "group")
+                        title = "<b>Meest Voorkomende Misdrijven</b>",
+                        barmode = "group",
+                        margin = list(t = 80))
   
   return(fig)
 }
@@ -154,7 +154,7 @@ create_prediction_chart <- function(cityName)
   fig <- fig %>% add_trace( text = round(prediction[,"Hi 95"]),y = row.names(prediction),x = prediction[,"Hi 95"], name = "Hoogst verwachte aantal",width = 0.3)
   fig <- fig %>%add_trace(text =round(prediction[,"Point Forecast"]) ,y = row.names(prediction),x = prediction[,"Point Forecast"], name = "Gemiddeld verwachte aantal",width = 0.3)
   fig <- fig %>% add_trace(text = round(prediction[,"Lo 95"]),y = row.names(prediction),x = prediction[,"Lo 95"], name = "Laagst verwachte aantal",width = 0.3)
-  fig <- fig %>% layout(title = paste("Voorspelling aantal diefstallen", row.names(prediction),sep = " "),xaxis = list(title = "aantal diefstallen"), yaxis = list(title = "Maand", visible = FALSE), barmode = "overlay")
+  fig <- fig %>% layout(margin = list(t = 80), title = paste("<b>Voorspelling aantal diefstallen ", row.names(prediction), "</b>"),xaxis = list(title = "Aantal diefstallen"), yaxis = list(title = "Maand", visible = FALSE), barmode = "overlay")
   return(fig)
 }
 
@@ -180,7 +180,7 @@ bike_theft_chart <- function(cityName)
                 mode = "lines+markers")
   fig <- fig %>% add_trace(data = bike_theft_ned, y = ~GeregistreerdeMisdrijven_1, name = "Nederland", mode = "lines+markers")
   
-  fig <- fig %>% layout(title = paste("Diefstal van brom-, snor-, fietsen","per 10 000 inwoners", sep = "\n"))
+  fig <- fig %>% layout(title = paste("<b>Diefstal van brom-, snor-, fietsen","per 10 000 inwoners</b>", sep = "\n"), margin = list(t = 80),xaxis = list(title = "Maand"), yaxis = list(title = "Aantal diefstallen"))
   return(fig)
 }
 
@@ -208,7 +208,7 @@ company_robberies_chart <- function(cityName)
                  mode = "lines+markers")
   fig <- fig %>% add_trace(data = robbery_data_ned, y = ~GeregistreerdeMisdrijven_1, name = "Nederland", mode = "lines+markers")
   
-  fig <- fig %>% layout(title = paste("Diefstal en inbraak bij bedrijven","per 10 000 inwoners", sep = "\n"))
+  fig <- fig %>% layout(title = paste("<b>Diefstal en inbraak bij bedrijven","per 10 000 inwoners</b>", sep = "\n"), margin = list(t = 80),xaxis = list(title = "Maand"), yaxis = list(title = "Aantal diefstallen/inbraken"))
   return(fig)
 }
 
@@ -236,7 +236,7 @@ store_robberies_chart <- function(cityName)
                  mode = "lines+markers")
   fig <- fig %>% add_trace(data = robbery_data_ned, y = ~GeregistreerdeMisdrijven_1, name = "Nederland", mode = "lines+markers")
   
-  fig <- fig %>% layout(title = paste("Winkeldiefstal","per 10 000 inwoners", sep = "\n"))
+  fig <- fig %>% layout(title = paste("<b>Winkeldiefstal","per 10 000 inwoners</b>", sep = "\n"), margin = list(t = 80),xaxis = list(title = "Maand"), yaxis = list(title = "Aantal winkeldiefstallen"))
   return(fig)
 }
 

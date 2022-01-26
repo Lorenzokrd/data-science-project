@@ -11,11 +11,6 @@ names(uniqueMisdrijf) <- unique(gsub('[[:digit:]]+', '',as.character(main_meta$S
 #load GEOjson to create the map
 gemeentegrenzen <- geojson_read("https://raw.githubusercontent.com/dijkstrar/NL-gemeentegrenzen2020/main/gemeente_grenzen_2020.json", what = "sp")
 
-
-
-
-
-
 server <- function(input, output, session){
   toListen <- reactive({list(input$selectionYear,input$selectInput)})
   observeEvent(toListen(),
@@ -45,6 +40,19 @@ server <- function(input, output, session){
      #plot out the data on the map
      output$map <- renderLeaflet({
        
+     tag.map.title <- tags$style(HTML("
+      .leaflet-control.map-title { 
+        position: fixed;
+        text-align: center;
+        right: 40px;
+        color: #d1666b;
+        padding-left: 10px;
+        padding-right: 10px;
+        font-weight: bold;
+        font-size: 28px;
+      }
+    "))
+           
        leaflet(gemeentegrenzen2) %>%
          addProviderTiles("MapBox",  options = providerTileOptions(
            accessToken = Sys.getenv('sk.eyJ1IjoibG9yZW56b2tyIiwiYSI6ImNrd2NjbXYzZjBqYmoydm4yaGp0NWdjdTAifQ.MgJHvSiJFzLj3AWLRlBWNg'))) %>%  
@@ -62,7 +70,8 @@ server <- function(input, output, session){
                        style = list("font-weight" = "normal", padding = "8px 10px"),
                        textsize = "16px",
                        direction = "auto")) %>%
-         addLegend(values=~gemeentegrenzen2$GeregistreerdeMisdrijvenPer1000Inw_3,pal=qpal, position = "bottomright", title="Misdrijven per 1000 inwoners")
+         addLegend(values=~gemeentegrenzen2$GeregistreerdeMisdrijvenPer1000Inw_3,pal=qpal, position = "bottomright", title="Misdrijven per 1000 inwoners") %>%
+         addControl(tags$div(tag.map.title, HTML(input$selectInput)) , position = "topleft", className="map-title")
        })
      })
   
@@ -76,7 +85,7 @@ server <- function(input, output, session){
     
     updateTextInput(session, "searchField", value = regio_name)
     
-    output$piechart <- renderPlotly({ createPrioPieChart(regio,periode) })
+    output$piechart <- renderPlotly({ createPrioPieChart(regio,periode) }) 
     output$crimeRanking <- renderPlotly({ create_crime_ranking(periode,regio)})
 
     if(length(places[tolower(places$Title) == tolower(regio_name), "Key"] > 0))

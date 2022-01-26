@@ -22,8 +22,8 @@ ui <- fluidPage(
   ),
   theme = shinytheme("slate"),
   useShinyjs(),
-  navbarPage("Crime dashboard",id = "navBar",
-tabPanel("Map", value="mapPanel",
+  navbarPage("Misdaad dashboard",id = "navBar",
+tabPanel("Nederland", value="mapPanel",
          sidebarLayout(
            sidebarPanel( width = 3,
                          sliderInput("selectionYear", "Jaar", min = 2010, max = 2020, value = 2020, sep = "",
@@ -44,7 +44,7 @@ tabPanel("Map", value="mapPanel",
                       leafletOutput("map"),
            )
          ),),
-tabPanel("gemeente",value = "gemeentePanel",
+tabPanel("Gemeente",value = "gemeentePanel",
            # mainPanel(
            #            width = "100%",
            #            textInput("searchField","Gemeente zoeken",placeholder = "Naam van de gemeente", width = "100%"),
@@ -54,20 +54,25 @@ tabPanel("gemeente",value = "gemeentePanel",
            # ),
          fluidPage(
            fluidRow(
-             column(11,
-                   textInput("searchField","Gemeente zoeken",placeholder = "Naam van de gemeente", width = "100%"),
-                   actionButton("searchBtn", "Zoeken"),
-                   tags$style(type = "text/css", "#map {height: calc(100vh - 80px) !important;}"))),
+             column(12,
+                fluidRow(
+                    column(10, 
+                      textInput("searchField","Gemeente zoeken",placeholder = "Naam van de gemeente", width = "100%")
+                    ),
+                    column(2,
+                      actionButton("searchBtn", "Zoeken")
+                    ),
+                   tags$style(type = "text/css", "#map {height: calc(100vh - 80px) !important;}")))),
            tags$br(),
            fluidRow(
              column(
                6,
-               plotlyOutput("piechart"),
+               plotlyOutput("crimeRanking"),
 
              ),
              column(
                6,
-               plotlyOutput("crimeRanking"))
+               plotlyOutput("piechart"))
            ),
            tags$br(),
            fluidRow(

@@ -1,4 +1,8 @@
-/* Navar */
+body {
+  margin-bottom: 20px;
+}
+
+/* Navbar */
 
 span.navbar-brand {
   font-size: 23px;
@@ -89,4 +93,15 @@ span.navbar-brand {
 
 .irs--shiny .irs-single {
   background-color: #df6a6f !important;
+}
+
+/* Searchbar */
+
+label#searchField-label {
+    display: none;
+}
+
+button#searchBtn {
+    width: 100% !important;
+    height: 41px !important;
 }
