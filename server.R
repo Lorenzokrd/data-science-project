@@ -49,7 +49,7 @@ server <- function(input, output, session){
         padding-left: 10px;
         padding-right: 10px;
         font-weight: bold;
-        font-size: 28px;
+        font-size: 20px;
       }
     "))
            
@@ -71,7 +71,11 @@ server <- function(input, output, session){
                        textsize = "16px",
                        direction = "auto")) %>%
          addLegend(values=~gemeentegrenzen2$GeregistreerdeMisdrijvenPer1000Inw_3,pal=qpal, position = "bottomright", title="Misdrijven per 1000 inwoners") %>%
-         addControl(tags$div(tag.map.title, HTML(input$selectInput)) , position = "topleft", className="map-title")
+         
+         addControl(tags$div(tag.map.title, HTML(paste(
+           gsub('[[:digit:]]+', '',as.character(main_meta$SoortMisdrijf[input$selectInput == main_meta$SoortMisdrijf$Key, "Title"])),input$selectionYear, sep = " ")))
+           , position = "topleft",
+           className="map-title")
        })
      })
   
